@@ -1,5 +1,4 @@
 const mongoose = require('../../database');
-// const md5 = require('md5');
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
@@ -22,6 +21,11 @@ const UserSchema = new mongoose.Schema({
         type:String,
         required: false,
         default: null
+    },
+    permissions:{
+        type:Array,
+        required: true,
+        default: []
     },
     environment:{
         type:Array,

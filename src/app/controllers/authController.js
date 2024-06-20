@@ -19,7 +19,7 @@ router.post("/registerUser", async (req, res) => {
     }
     const user = await User.create(req.body);
     user.password = undefined;
-    return res.send({ success: true, dados: {user, token: generateToken({ id: user.id, email: user.email })} });
+    return res.send({ success: true, data: {user, token: generateToken({ id: user.id, email: user.email })} });
   } catch (error) {
     console.error(error);
     return res.status(400).send({ success: false, error: "Registration failed" });
@@ -36,7 +36,7 @@ router.post("/authenticateUser", async (req, res) => {
     return res.status(400).send({ success: false, error: "Invalid password" });
   }
   user.password = undefined;
-  return res.send({ success: true, dados: { user, token: generateToken({ id: user.id, email: user.email }) } });
+  return res.send({ success: true, data: { user, token: generateToken({ id: user.id, email: user.email }) } });
 });
 
 module.exports = (app) => app.use("/Auth", router);

@@ -31,7 +31,7 @@ router.post("/createEnvironment", async (req, res) => {
         };
         const environment = await Environment.create(environmentData);
         await User.updateOne({ _id: req.userId }, { $push: { environment: {id:environment.id} } });
-        return res.send({ success: true, dados: environment });
+        return res.send({ success: true, data: environment });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao criar ambiente", message: error.message });
@@ -50,7 +50,7 @@ router.delete("/deleteEnvironment", async (req, res) => {
         }
         const environment = await Environment.findByIdAndDelete(environmentId);
         await removeAssignEnvironments(environment.id);
-        return res.send({ success: true, dados: environment });
+        return res.send({ success: true, data: environment });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao excluir ambiente", message: error.message });
@@ -69,7 +69,7 @@ router.put("/updateEnvironment", async (req, res) => {
         }
         await Environment.updateOne({ _id: environmentId }, dataEnvironment);
         const environment = await Environment.findById(environmentId);
-        return res.send({ success: true, dados: environment });
+        return res.send({ success: true, data: environment });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao atualizar ambiente", message: error.message });

@@ -28,7 +28,7 @@ router.post("/createProcess", async (req, res) => {
         const process = await Process.create(processData);
         await User.updateOne({ _id: req.userId }, { $push: { process: {id:process.id} } });
         await assignProcesses(process.id);
-        return res.send({ success: true, dados: process });
+        return res.send({ success: true, data: process });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao criar processo", message: error.message });
@@ -44,7 +44,7 @@ router.delete("/deleteProcess", async (req, res) => {
         }
         const process = await Process.findByIdAndDelete(processId);
         await removeAssignProcesses(process.id);
-        return res.send({ success: true, dados: process });
+        return res.send({ success: true, data: process });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao excluir processo", message: error.message });
@@ -60,7 +60,7 @@ router.put("/updateProcess", async (req, res) => {
         }
         await Process.updateOne({ _id: processId }, dataProcess);
         const process = await Process.findById(processId);
-        return res.send({ success: true, dados: process });
+        return res.send({ success: true, data: process });
     } catch (error) {
         console.error(error);
         return res.status(400).send({ success: false, error: "Erro ao atualizar processo", message: error.message });

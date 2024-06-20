@@ -18,6 +18,11 @@ const TaskSchema = new mongoose.Schema({
         required: false,
         default: []
     },
+    properties:{
+        type:Array,
+        required: true,
+        default: []
+    },
     phase_id:{
         type:String,
         required: true,
