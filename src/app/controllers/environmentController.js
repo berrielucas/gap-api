@@ -76,13 +76,6 @@ router.put("/updateEnvironment", async (req, res) => {
     }
 });
 
-// async function assignEnvironments(processId) {
-//     const users = await User.find({assignProcesses:true});
-//     users.forEach(async u => {
-//         await User.updateOne({ _id: u.id }, { $addToSet: { process: {id:processId} } })
-//     });
-// }
-
 async function removeAssignEnvironments(environmentId) {
     const users = await User.find();
     users.forEach(async u => {
