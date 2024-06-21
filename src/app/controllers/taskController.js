@@ -7,7 +7,7 @@ const Process = require("../models/Process");
 const router = express.Router();
 router.use(authBodyMiddleware);
 
-router.get('/listAllTasks', async (req, res)=>{
+router.post('/listAllTasks', async (req, res)=>{
     const user = await User.findById(req.userId);
     const { processId } = req.body;
     if (!user) {
@@ -16,12 +16,19 @@ router.get('/listAllTasks', async (req, res)=>{
     if (!processId) {
         return res.status(400).send({ success: false, error:'Campo `processId` não pode está vazio' });
     }
-    const process = await Process.findById(processId);
-    if (!process) {
-        return res.status(400).send({ success: false, error:'Processo não encontrado' });
+    try {
+        const process = await Process.findOne({ _id: processId });
+        if (!process) {
+            return res.status(400).send({ success: false, error:'Processo não encontrado' });
+        }
+        if (user.process.filter(p=>p.id===processId).length===0) {
+            return res.status(401).send({ success: false, error: "Processo sem permissão" });
+        }
+        const tasks = await Task.find({ process_id: processId });
+        res.status(200).send({ success: true, data: { process: { id: process.id, name: process.name, phases: process.phases }, tasks: tasks} });
+    } catch (error) {
+        return res.status(400).send({ success: false, error:'Erro ao listar tarefas', message: error.message });
     }
-    const tasks = Task.find({ process_id: processId });
-    res.status(200).send({ success: true, data: tasks });
 });
 
 router.post("/createTask", async (req, res) => {
@@ -73,4 +80,23 @@ router.put("/updateTask", async (req, res) => {
     }
 });
 
-module.exports = (app) => app.use("/Process", router);
+router.put("/updatePhaseTask", async (req, res) => {
+    const { taskId, dataTask } = req.body;
+    try {
+        if (!taskId) {
+            return res.status(400).send({ success: false, error:'Campo `taskId` não pode está vazio' });
+        }
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(401).send({ success: false, error: "Sem permissão para editar tarefa" });
+        }
+        await Task.updateOne({ _id: taskId }, dataTask);
+        const task = await Task.findById(taskId);
+        return res.send({ success: true, data: task });
+    } catch (error) {
+        console.error(error);
+        return res.status(400).send({ success: false, error: "Erro ao editar tarefa", message: error.message });
+    }
+});
+
+module.exports = (app) => app.use("/Task", router);

@@ -6,6 +6,11 @@ const EnvironmentSchema = new mongoose.Schema({
         required: false,
         default: null,
     },
+    url:{
+        type:String,
+        unique: true,
+        required: true,
+    },
     name:{
         type:String,
         required: true,

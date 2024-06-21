@@ -21,10 +21,14 @@ router.get('/listAllEnvironment', async (req, res)=>{
 
 router.post("/createEnvironment", async (req, res) => {
     const environmentData = req.body;
+    const uri = environmentData.url
     const user = await User.findById(req.userId).select("+fullUser");
     try {
         if (!user.fullUser) {
             return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
+        }
+        if (await Environment.findOne({ uri })) {
+            return res.status(400).send({ success: false, error: "Url indisponível" });
         }
         environmentData.createdBy = {
             userId: req.userId
