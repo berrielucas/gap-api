@@ -32,12 +32,12 @@ const UserSchema = new mongoose.Schema({
         required: true,
         default: []
     },
-    process:{
+    followup:{
         type:Array,
         required: true,
         default: []
     },
-    assignProcesses:{
+    assignFollowup:{
         type:Boolean,
         required: true,
         default: false

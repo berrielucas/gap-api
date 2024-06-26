@@ -1,6 +1,6 @@
 const mongoose = require('../../database');
 
-const ProcessSchema = new mongoose.Schema({
+const FollowupSchema = new mongoose.Schema({
     codigo:{
         type:String,
         required: false,
@@ -36,6 +36,6 @@ const ProcessSchema = new mongoose.Schema({
     }
 });
 
-const Process = mongoose.model('Process' ,ProcessSchema);
+const Followup = mongoose.model('Followup' ,FollowupSchema);
 
-module.exports = Process;
+module.exports = Followup;

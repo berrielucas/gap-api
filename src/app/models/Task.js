@@ -9,7 +9,7 @@ const TaskSchema = new mongoose.Schema({
         type:String,
         required: false,
     },
-    process_id:{
+    followup_id:{
         type:String,
         required: true,
     },

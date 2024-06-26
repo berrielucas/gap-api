@@ -2,30 +2,19 @@ const express = require("express");
 const authBodyMiddleware = require("../middlewares/authBody");
 const User = require("../models/User");
 const Task = require("../models/Task");
-const Process = require("../models/Process");
+const Followup = require("../models/Followup");
 
 const router = express.Router();
 router.use(authBodyMiddleware);
 
 router.post('/listAllTasks', async (req, res)=>{
-    const user = await User.findById(req.userId);
-    const { processId } = req.body;
-    if (!user) {
-        return res.status(401).send({ success: false, error:'Unauthorized' });
-    }
-    if (!processId) {
-        return res.status(400).send({ success: false, error:'Campo `processId` não pode está vazio' });
-    }
     try {
-        const process = await Process.findOne({ _id: processId });
-        if (!process) {
-            return res.status(400).send({ success: false, error:'Processo não encontrado' });
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(401).send({ success: false, error:'Unauthorized' });
         }
-        if (user.process.filter(p=>p.id===processId).length===0) {
-            return res.status(401).send({ success: false, error: "Processo sem permissão" });
-        }
-        const tasks = await Task.find({ process_id: processId });
-        res.status(200).send({ success: true, data: { process: { id: process.id, name: process.name, phases: process.phases }, tasks: tasks} });
+        const tasks = await Task.find();
+        res.status(200).send({ success: true, data: tasks });
     } catch (error) {
         return res.status(400).send({ success: false, error:'Erro ao listar tarefas', message: error.message });
     }

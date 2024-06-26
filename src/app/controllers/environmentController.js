@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(authBodyMiddleware);
 
 
-router.get('/listAllEnvironment', async (req, res)=>{
+router.post('/listAllEnvironment', async (req, res)=>{
     const user = await User.findById(req.userId);
     if (!user) {
         return res.status(401).send({ success: false, error:'Unauthorized' });
