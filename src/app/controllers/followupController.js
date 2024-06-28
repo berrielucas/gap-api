@@ -46,13 +46,21 @@ router.post('/listAllTasks', async (req, res)=>{
 
 router.post("/createFollowup", async (req, res) => {
     const followupData = req.body;
+    const { environment_id } = req.body;
     try {
+        if (!environment_id) {
+            return res.status(400).send({ success: false, error:'Campo `environment_id` não pode está vazio' });
+        }
+        const user = await User.findById(req.userId);
+        if (!user.environment.filter(e=>e.id===environment_id)[0].permissions.includes("create-followup")) {
+            return res.status(400).send({ success: false, error: "Sem permissão para criar seguimento" });
+        }
         followupData.createdBy = {
             userId: req.userId
         };
         const followup = await Followup.create(followupData);
-        await User.updateOne({ _id: req.userId }, { $push: { followup: {id:followup.id} } });
-        await assignFollowup(followup.id);
+        await User.updateOne({ _id: req.userId }, { $push: { followup: {id:followup.id, permissions: ["create-task","edit-task","delete-task","view-all-task","add-users"]} } });
+        await assignFollowup(followup.id, environment_id, []);
         return res.send({ success: true, data: followup });
     } catch (error) {
         console.error(error);
@@ -61,14 +69,23 @@ router.post("/createFollowup", async (req, res) => {
 });
 
 router.delete("/deleteFollowup", async (req, res) => {
-    const { followupId } = req.body;
+    const { followupId, environment_id } = req.body;
     try {
+        if (!followupId) {
+            return res.status(400).send({ success: false, error:'Campo `followupId` não pode está vazio' });
+        }
+        if (!environment_id) {
+            return res.status(400).send({ success: false, error:'Campo `environment_id` não pode está vazio' });
+        }
         const user = await User.findById(req.userId);
         if (user.followup.filter(f=>f.id===followupId).length===0) {
             return res.status(401).send({ success: false, error: "Seguimento sem permissão" });
         }
+        if (!user.environment.filter(e=>e.id===environment_id)[0].permissions.includes("delete-followup")) {
+            return res.status(400).send({ success: false, error: "Sem permissão para excluir seguimento" });
+        }
         const followup = await Followup.findByIdAndDelete(followupId);
-        await removeAssignFollowup(followup.id);
+        await removeAssignFollowup(followupId);
         return res.send({ success: true, data: followup });
     } catch (error) {
         console.error(error);
@@ -77,11 +94,20 @@ router.delete("/deleteFollowup", async (req, res) => {
 });
 
 router.put("/updateFollowup", async (req, res) => {
-    const { followupId, dataFollowup } = req.body;
+    const { followupId, dataFollowup, environment_id } = req.body;
     try {
+        if (!followupId) {
+            return res.status(400).send({ success: false, error:'Campo `followupId` não pode está vazio' });
+        }
+        if (!environment_id) {
+            return res.status(400).send({ success: false, error:'Campo `environment_id` não pode está vazio' });
+        }
         const user = await User.findById(req.userId);
         if (user.followup.filter(f=>f.id===followupId).length===0) {
             return res.status(401).send({ success: false, error: "Seguimento sem permissão" });
+        }
+        if (!user.environment.filter(e=>e.id===environment_id)[0].permissions.includes("edit-followup")) {
+            return res.status(400).send({ success: false, error: "Sem permissão para editar seguimento" });
         }
         await Followup.updateOne({ _id: followupId }, dataFollowup);
         const followup = await Followup.findById(followupId);
@@ -92,17 +118,24 @@ router.put("/updateFollowup", async (req, res) => {
     }
 });
 
-async function assignFollowup(followupId) {
-    const users = await User.find({assignFollowup:true});
-    users.forEach(async u => {
-        await User.updateOne({ _id: u.id }, { $addToSet: { followup: {id: followupId} } })
+async function assignFollowup(followupId, envId, permissions) {
+    const users = await User.find();
+    const permittedUsers = users.filter(u=>u.environment.some(e=>e.id===envId&&e.assignFollowup===true));
+    permittedUsers.forEach(async u => {
+        if (u.followup.filter(f=>f.id===followupId).length===0) {
+            await User.updateOne({ _id: u.id }, { $addToSet: { followup: {id: followupId, permissions: permissions} } })
+        }
     });
 }
 
 async function removeAssignFollowup(followupId) {
     const users = await User.find();
     users.forEach(async u => {
-        await User.updateOne({ _id: u.id }, { $pull: { followup: { id: followupId } } })
+        // await User.updateOne({ _id: u.id }, { $pull: { followup: { id: followupId } } })
+        const followup = u.followup.filter(f => f.id === followupId);
+        if (followup.length>0) {
+            await User.updateOne({ _id: u.id }, { $pullAll: { followup: followup } })
+        }
     });
 }
 

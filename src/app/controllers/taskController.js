@@ -22,9 +22,13 @@ router.post('/listAllTasks', async (req, res)=>{
 
 router.post("/createTask", async (req, res) => {
     const taskData = req.body;
+    const { followup_id } = req.body;
     try {
+        if (!followup_id) {
+            return res.status(400).send({ success: false, error:'Campo `followup_id` não pode está vazio' });
+        }
         const user = await User.findById(req.userId);
-        if (!user.permissions.includes("create-task")) {
+        if (!user.followup.filter(f=>f.id===followup_id)[0].permissions.includes("create-task")) {
             return res.status(400).send({ success: false, error: "Sem permissão para criar tarefa" });
         }
         taskData.createdBy = {
@@ -39,10 +43,13 @@ router.post("/createTask", async (req, res) => {
 });
 
 router.delete("/deleteTask", async (req, res) => {
-    const { taskId } = req.body;
+    const { taskId, followup_id } = req.body;
     try {
+        if (!followup_id) {
+            return res.status(400).send({ success: false, error:'Campo `followup_id` não pode está vazio' });
+        }
         const user = await User.findById(req.userId);
-        if (!user.permissions.includes("delete-task")) {
+        if (!user.followup.filter(f=>f.id===followup_id)[0].permissions.includes("delete-task")) {
             return res.status(400).send({ success: false, error: "Sem permissão para excluir tarefa" });
         }
         const task = await Task.findByIdAndDelete(taskId);
@@ -54,10 +61,13 @@ router.delete("/deleteTask", async (req, res) => {
 });
 
 router.put("/updateTask", async (req, res) => {
-    const { taskId, dataTask } = req.body;
+    const { taskId, dataTask, followup_id } = req.body;
     try {
+        if (!followup_id) {
+            return res.status(400).send({ success: false, error:'Campo `followup_id` não pode está vazio' });
+        }
         const user = await User.findById(req.userId);
-        if (!user.permissions.includes("edit-task")) {
+        if (!user.followup.filter(f=>f.id===followup_id)[0].permissions.includes("edit-task")) {
             return res.status(400).send({ success: false, error: "Sem permissão para editar tarefa" });
         }
         await Task.updateOne({ _id: taskId }, dataTask);

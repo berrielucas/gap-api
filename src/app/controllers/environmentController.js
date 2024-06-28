@@ -24,9 +24,9 @@ router.post("/createEnvironment", async (req, res) => {
     const uri = environmentData.url
     const user = await User.findById(req.userId).select("+fullUser");
     try {
-        if (!user.fullUser) {
-            return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
-        }
+        // if (!user.fullUser) {
+        //     return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
+        // }
         if (await Environment.findOne({ uri })) {
             return res.status(400).send({ success: false, error: "Url indisponível" });
         }
@@ -34,7 +34,7 @@ router.post("/createEnvironment", async (req, res) => {
             userId: req.userId
         };
         const environment = await Environment.create(environmentData);
-        await User.updateOne({ _id: req.userId }, { $push: { environment: {id:environment.id} } });
+        await User.updateOne({ _id: req.userId }, { $push: { environment: {id:environment.id, assignFollowup: true, permissions: ["create-followup","edit-followup","delete-followup", "view-all-followup", "full-user"]} } });
         return res.send({ success: true, data: environment });
     } catch (error) {
         console.error(error);
@@ -46,14 +46,14 @@ router.delete("/deleteEnvironment", async (req, res) => {
     const { environmentId } = req.body;
     try {
         const user = await User.findById(req.userId).select("+fullUser");
-        if (!user.fullUser) {
-            return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
-        }
+        // if (!user.fullUser) {
+        //     return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
+        // }
         if (user.environment.filter(e=>e.id===environmentId).length===0) {
             return res.status(401).send({ success: false, error: "Ambiente sem permissão" });
         }
         const environment = await Environment.findByIdAndDelete(environmentId);
-        await removeAssignEnvironments(environment.id);
+        await removeAssignEnvironments(environmentId);
         return res.send({ success: true, data: environment });
     } catch (error) {
         console.error(error);
@@ -65,9 +65,9 @@ router.put("/updateEnvironment", async (req, res) => {
     const { environmentId, dataEnvironment } = req.body;
     try {
         const user = await User.findById(req.userId).select("+fullUser");
-        if (!user.fullUser) {
-            return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
-        }
+        // if (!user.fullUser) {
+        //     return res.status(401).send({ success: false, error: "Sem permissão, solicite ao Administrador responsável" });
+        // }
         if (user.environment.filter(e=>e.id===environmentId).length===0) {
             return res.status(401).send({ success: false, error: "Ambiente sem permissão" });
         }
@@ -85,7 +85,7 @@ async function removeAssignEnvironments(environmentId) {
     users.forEach(async u => {
         const environment = u.environment.filter(e => e.id === environmentId);
         if (environment.length>0) {
-            await User.updateOne({ _id: u.id }, { $pull: { environment: environment[0] } })
+            await User.updateOne({ _id: u.id }, { $pullAll: { environment: environment } })
         }
     });
 }
