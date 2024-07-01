@@ -4,14 +4,20 @@ const User = require("../models/User");
 const Task = require("../models/Task");
 const Followup = require("../models/Followup");
 
+
+// Route configuration with middleware - `tokenUser` parameter required for authentication
+// Configuração da rota com o middleware - necessário o parâmetro `tokenUser` para autenticação
 const router = express.Router();
 router.use(authBodyMiddleware);
 
+
+// Method to list all tasks
+// Método para listar todas as tasks
 router.post('/listAllTasks', async (req, res)=>{
     try {
         const user = await User.findById(req.userId);
         if (!user) {
-            return res.status(401).send({ success: false, error:'Unauthorized' });
+            return res.status(401).send({ success: false, error:'Unauthorized' }); 
         }
         const tasks = await Task.find();
         res.status(200).send({ success: true, data: tasks });
@@ -20,6 +26,9 @@ router.post('/listAllTasks', async (req, res)=>{
     }
 });
 
+
+// Method for creating task
+// Método para criar task
 router.post("/createTask", async (req, res) => {
     const taskData = req.body;
     const { followup_id } = req.body;
@@ -42,6 +51,9 @@ router.post("/createTask", async (req, res) => {
     }
 });
 
+
+// Method to delete task
+// Método para excluir task
 router.delete("/deleteTask", async (req, res) => {
     const { taskId, followup_id } = req.body;
     try {
@@ -60,6 +72,9 @@ router.delete("/deleteTask", async (req, res) => {
     }
 });
 
+
+// Method for updating task
+// Método para atualizar task
 router.put("/updateTask", async (req, res) => {
     const { taskId, dataTask, followup_id } = req.body;
     try {
@@ -79,6 +94,9 @@ router.put("/updateTask", async (req, res) => {
     }
 });
 
+
+// Method for updating the task step
+// Método para atualizar a etapa da task
 router.put("/updatePhaseTask", async (req, res) => {
     const { taskId, dataTask } = req.body;
     try {
@@ -97,5 +115,6 @@ router.put("/updatePhaseTask", async (req, res) => {
         return res.status(400).send({ success: false, error: "Erro ao editar tarefa", message: error.message });
     }
 });
+
 
 module.exports = (app) => app.use("/Task", router);

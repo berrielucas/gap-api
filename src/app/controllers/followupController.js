@@ -3,17 +3,32 @@ const authBodyMiddleware = require("../middlewares/authBody");
 const User = require("../models/User");
 const Followup = require("../models/Followup");
 const Task = require("../models/Task");
+const Environment = require("../models/Environment");
 
+// Route configuration with middleware - `tokenUser` parameter required for authentication
+// Configuração da rota com o middleware - necessário o parâmetro `tokenUser` para autenticação
 const router = express.Router();
 router.use(authBodyMiddleware);
 
 
 router.post('/listAllFollowup', async (req, res)=>{
     const user = await User.findById(req.userId);
+    const { envId } = req.body;
     if (!user) {
         return res.status(401).send({ success: false, error:'Unauthorized' });
     }
-    const followup = await Followup.find();
+    if (!envId) {
+        return res.status(400).send({ success: false, error:'Campo `envId` não pode está vazio' });
+    }
+    const environment = await Environment.findById(envId);
+    if (!environment) {
+        return res.status(400).send({ success: false, error:'Ambiente não encontrado' });
+    }
+    console.log(environment);
+    if (!environment.active) {
+        return res.status(400).send({ success: false, error:'Ambiente desativado' });
+    }
+    const followup = await Followup.find({ environment_id: environment._id});
     const permittedFollowup = followup.filter(f => 
         user.followup.some(uf => uf.id === f.id)
     );

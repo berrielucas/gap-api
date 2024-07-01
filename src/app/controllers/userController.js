@@ -2,6 +2,9 @@ const express = require("express");
 const authBodyMiddleware = require("../middlewares/authBody");
 const User = require("../models/User");
 
+
+// Route configuration with middleware - `tokenUser` parameter required for authentication
+// Configuração da rota com o middleware - necessário o parâmetro `tokenUser` para autenticação
 const router = express.Router();
 router.use(authBodyMiddleware);
 

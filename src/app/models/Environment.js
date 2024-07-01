@@ -15,6 +15,11 @@ const EnvironmentSchema = new mongoose.Schema({
         type:String,
         required: true,
     },
+    active:{
+        type:Boolean,
+        required: true,
+        default: true
+    },
     createdBy:{
         type:Object,
         required: false,
