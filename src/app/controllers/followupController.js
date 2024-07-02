@@ -24,7 +24,6 @@ router.post('/listAllFollowup', async (req, res)=>{
     if (!environment) {
         return res.status(400).send({ success: false, error:'Ambiente não encontrado' });
     }
-    console.log(environment);
     if (!environment.active) {
         return res.status(400).send({ success: false, error:'Ambiente desativado' });
     }
