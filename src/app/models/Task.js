@@ -4,10 +4,12 @@ const TaskSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    default: null
   },
   description: {
     type: String,
     required: false,
+    default: ""
   },
   followup_id: {
     type: String,

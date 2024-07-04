@@ -54,7 +54,7 @@ router.post("/createTask", async (req, res) => {
 
 // Method to delete task
 // Método para excluir task
-router.delete("/deleteTask", async (req, res) => {
+router.post("/deleteTask", async (req, res) => {
     const { taskId, followup_id } = req.body;
     try {
         if (!followup_id) {
