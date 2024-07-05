@@ -25,11 +25,7 @@ const EnvironmentSchema = new mongoose.Schema({
     required: false,
     default: null,
   },
-  createAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 const Environment = mongoose.model("Environment", EnvironmentSchema);
 

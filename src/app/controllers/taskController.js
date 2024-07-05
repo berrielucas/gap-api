@@ -27,6 +27,26 @@ router.post('/listAllTasks', async (req, res)=>{
 });
 
 
+// Method to list all tasks
+// Método para listar todas as tasks
+router.post('/getTask', async (req, res)=>{
+    const { taskId } = req.body;
+    try {
+        const user = await User.findById(req.userId);
+        if (!user) {
+            return res.status(401).send({ success: false, error:'Unauthorized' }); 
+        }
+        if (!taskId) {
+            return res.status(400).send({ success: false, error:'Campo `taskId` não pode está vazio' });
+        }
+        const task = await Task.findById(taskId);
+        res.status(200).send({ success: true, data: task });
+    } catch (error) {
+        return res.status(400).send({ success: false, error:'Erro ao listar tarefas', message: error.message });
+    }
+});
+
+
 // Method for creating task
 // Método para criar task
 router.post("/createTask", async (req, res) => {
@@ -44,6 +64,7 @@ router.post("/createTask", async (req, res) => {
             userId: req.userId
         };
         const task = await Task.create(taskData);
+        await Followup.updateOne({ _id: followup_id }, { $inc: { "countTasks": 1 } });
         return res.send({ success: true, data: task });
     } catch (error) {
         console.error(error);
@@ -65,6 +86,7 @@ router.post("/deleteTask", async (req, res) => {
             return res.status(400).send({ success: false, error: "Sem permissão para excluir tarefa" });
         }
         const task = await Task.findByIdAndDelete(taskId);
+        await Followup.updateOne({ _id: followup_id }, { $inc: { "countTasks": -1 } });
         return res.send({ success: true, data: task });
     } catch (error) {
         console.error(error);

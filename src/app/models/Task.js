@@ -40,11 +40,7 @@ const TaskSchema = new mongoose.Schema({
     required: false,
     default: null,
   },
-  createAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 const Task = mongoose.model("Task", TaskSchema);
 

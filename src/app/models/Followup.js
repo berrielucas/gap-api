@@ -23,18 +23,18 @@ const FollowupSchema = new mongoose.Schema({
   environment_id: {
     type: String,
     required: true,
-    // default: null
+  },
+  countTasks: {
+    type: Number,
+    required: true,
+    default: 0
   },
   createdBy: {
     type: Object,
     required: false,
     default: null,
   },
-  createAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 const Followup = mongoose.model("Followup", FollowupSchema);
 

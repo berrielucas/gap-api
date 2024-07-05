@@ -28,7 +28,7 @@ router.post('/listAllFollowup', async (req, res)=>{
         return res.status(400).send({ success: false, error:'Ambiente desativado' });
     }
     const followup = await Followup.find({ environment_id: environment._id});
-    const permittedFollowup = followup.filter(f => 
+    let permittedFollowup = followup.filter(f => 
         user.followup.some(uf => uf.id === f.id)
     );
     res.status(200).send({ success: true, data: permittedFollowup });
@@ -36,7 +36,7 @@ router.post('/listAllFollowup', async (req, res)=>{
 
 router.post('/listAllTasks', async (req, res)=>{
     const user = await User.findById(req.userId);
-    const { followupId } = req.body;
+    const { followupId, limit } = req.body;
     if (!user) {
         return res.status(401).send({ success: false, error:'Unauthorized' });
     }
@@ -51,7 +51,11 @@ router.post('/listAllTasks', async (req, res)=>{
         if (user.followup.filter(f=>f.id===followupId).length===0) {
             return res.status(401).send({ success: false, error: "Seguimento sem permissão" });
         }
-        const tasks = await Task.find({ followup_id: followupId });
+        const query = Task.find({ followup_id: followupId }).sort({ createdAt: -1 });
+        if (limit) {
+            query.limit(limit);
+        }
+        const tasks = await query;
         res.status(200).send({ success: true, data: tasks });
     } catch (error) {
         return res.status(400).send({ success: false, error:'Erro ao listar tarefas', message: error.message });
