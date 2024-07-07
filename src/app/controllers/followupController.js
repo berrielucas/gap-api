@@ -86,7 +86,7 @@ router.post("/createFollowup", async (req, res) => {
     }
 });
 
-router.delete("/deleteFollowup", async (req, res) => {
+router.post("/deleteFollowup", async (req, res) => {
     const { followupId, environment_id } = req.body;
     try {
         if (!followupId) {
