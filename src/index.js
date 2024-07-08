@@ -10,4 +10,4 @@ app.use(cors());
 
 require('./app/controllers')(app);
 
-app.listen(3000, () => {console.log("Serve inicializado...")})
+app.listen(process.env.PORT, () => {console.log("Serve inicializado...")})
